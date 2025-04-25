@@ -40,7 +40,7 @@ const PropHistory = ({ messages, avatar }) => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 1, duration: 0.05 }}
                                 >
-                                    {index === 0 ? "Hello, How can I help you" : index === 1 ? "sure, It's my pleasure to help you." : "No problem"}
+                                    {index === 0 ? "Hello, how can I help you" : index === 1 ? "Sure, it's my pleasure to help you." : "No problem"}
 
                                 </motion.div>
                             )}
