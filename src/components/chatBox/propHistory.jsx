@@ -1,56 +1,95 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { useGlobal } from '../../states/GlobalState';
 
-const PropHistory = ({ messages, avatar }) => {
+const PropHistory = () => {
     const bottomRef = useRef(null);
-    const [isThinking, setIsThinking] = useState(true);
-    const [showAnswer, setShowAnswer] = useState(false);
+    const { requestMsg, responseMsg, isConnected } = useGlobal();
 
+    // Conversation history state
+    const [conversation, setConversation] = React.useState([]);
+    const [isLoading, setIsLoading] = React.useState(false);
+
+    const avatarUrl = '/Archi.ai.png';
+
+    // Handle new user messages
+    useEffect(() => {
+        if (requestMsg && requestMsg.trim() !== '') {
+            setConversation(prev => [...prev, {
+                type: 'user',
+                content: requestMsg
+            }]);
+            setIsLoading(true);
+        }
+    }, [requestMsg]);
+
+    // Handle AI responses
+    useEffect(() => {
+        if (responseMsg && responseMsg.trim() !== '') {
+            setIsLoading(false);
+            // Format the response (remove "AI Response: " prefix if present)
+            const formattedResponse = responseMsg.replace(/^AI Response: /, '');
+            setConversation(prev => [...prev, {
+                type: 'ai',
+                content: formattedResponse
+            }]);
+        }
+    }, [responseMsg]);
+
+    // Scroll to bottom when conversation updates
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-        const thinkingTimer = setTimeout(() => {
-            setIsThinking(false);
-            setShowAnswer(true);
-        }, 1000);
-        return () => clearTimeout(thinkingTimer);
-    }, [messages]);
+    }, [conversation, isLoading]);
+
+    // Display connection status
+    const ConnectionStatus = () => (
+        <div className={`absolute top-2 right-2 flex items-center ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
+            <div className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}></div>
+            <span className="text-xs">{isConnected ? 'Connected' : 'Disconnected'}</span>
+        </div>
+    );
 
     return (
-        <div className="flex flex-col h-full p-4 overflow-y-auto no-scrollbar">
-            {messages.map((msg, index) => (
-                <div key={index} className="flex flex-col w-full ">
-                    <div className="flex flex-rows float-right items-center mb-4 p-4 bg-gray-400/10 text-white rounded-lg">
-                        {msg}
-                    </div>
-                    {index < 3 &&
-                        <div className="flex flex-rows left items-center mb-4 p-4 bg-slate-900/80 text-white rounded-lg">
-                            <img src={avatar} alt="Avatar" className="w-8 h-8 mr-4 rounded-full" />
-                            {isThinking && (
-                                <div>
-                                    <div className="p-4 rounded-xl shadow text-gray-600 flex items-center space-x-2">
-                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0s]"></div>
-                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-                                    </div>
-                                </div>
-                            )}
-                            {showAnswer && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 0 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 1, duration: 0.05 }}
-                                >
-                                    {index === 0 ? "Hello, how can I help you" : index === 1 ? "Sure, it's my pleasure to help you." : "No problem"}
+        <div className="flex flex-col h-full py-4 px-2 overflow-y-auto no-scrollbar relative">
+            <ConnectionStatus />
 
-                                </motion.div>
-                            )}
+            {conversation.length === 0 && (
+                <div className="flex items-center justify-center h-full text-gray-400">
+                    <p>Start a conversation with Archi.ai</p>
+                </div>
+            )}
+
+            {conversation.map((msg, index) => (
+                <div key={index} className={`flex w-full mb-4 ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`flex p-4 rounded-lg max-w-[80%] ${
+                        msg.type === 'user'
+                            ? 'bg-gray-400/10 text-white'
+                            : 'bg-slate-900/80 text-white'
+                    }`}>
+                        {msg.type === 'ai' && (
+                            <img src={avatarUrl} alt="Avatar" className="w-8 h-8 mr-4 rounded-full" />
+                        )}
+                        <div className="whitespace-pre-wrap">
+                            {msg.content}
                         </div>
-
-                    }
-                    <div ref={bottomRef} />
-
+                    </div>
                 </div>
             ))}
+
+            {isLoading && (
+                <div className="flex justify-start mb-4">
+                    <div className="flex p-4 rounded-lg bg-slate-900/80 text-white">
+                        <img src={avatarUrl} alt="Avatar" className="w-8 h-8 mr-4 rounded-full" />
+                        <motion.div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0s]"></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                        </motion.div>
+                    </div>
+                </div>
+            )}
+
+            <div ref={bottomRef} />
         </div>
     );
 };
