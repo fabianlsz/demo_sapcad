@@ -1,12 +1,11 @@
-# React + Vite
+usage: - create 2 terminals, one for backend purposes, one for frontend.
+Backend terminal: run "pip install -r req.txt"
+                  uvicorn main:app --reload
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend terminal: npm run dev
 
-Currently, two official plugins are available:
+Upon opening the web application you will be able to chat with the bot (TODO, need server-sided AI Model implementation)
+if you do not have llama3.2.gguf installed it will be impossible to connect and chat (FOR NOW!!)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Upload file lets you visualize the IFC file. Chat with the bot to apply changes to your IFC file. Visualize the changes upon completion.
+Files are stored in a folder called uploads, they can also be viewed from backend url.
